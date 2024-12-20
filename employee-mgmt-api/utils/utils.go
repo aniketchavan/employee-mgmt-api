@@ -1,4 +1,3 @@
-// utils/excel.go
 package utils
 
 import (
@@ -12,6 +11,7 @@ import (
 
 func ParseExcelFile(filePath string) ([]datamodel.Employee, error) {
 
+	// To skip header insertion
 	var startRecordAt int
 	if startRecord, isPresent := config.ConfigSet.Properties["StartRecordFrom"]; isPresent {
 		var err error
@@ -28,6 +28,7 @@ func ParseExcelFile(filePath string) ([]datamodel.Employee, error) {
 	}
 
 	// Read data from the first sheet
+	// TODO: Make the sheet name configurable
 	rows, err := f.GetRows("uk-500")
 	if err != nil {
 		return nil, fmt.Errorf("unable to read rows: %v", err)
@@ -41,7 +42,7 @@ func ParseExcelFile(filePath string) ([]datamodel.Employee, error) {
 		if idx < startRecordAt {
 			continue
 		}
-		if len(row) < 10 { // Assuming at least two columns (e.g., Name and Email)
+		if len(row) < 10 {
 			continue
 		}
 		employee := datamodel.Employee{

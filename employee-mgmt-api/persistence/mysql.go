@@ -1,4 +1,3 @@
-// database/mysql.go
 package persistence
 
 import (

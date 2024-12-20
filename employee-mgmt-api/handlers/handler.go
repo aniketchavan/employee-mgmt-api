@@ -1,4 +1,3 @@
-// handlers/employee.go
 package handlers
 
 import (
@@ -36,10 +35,12 @@ func UploadEmployeeData(c *gin.Context) {
 
 	// Store each employee in MySQL and Redis
 	for _, employee := range employees {
+		// Persisting in MySQL DB
 		if err := persistence.StoreEmployee(employee); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to store employee in MySQL"})
 			return
 		}
+		// Caching in Redis for 5 min
 		if err := persistence.StoreEmployeeInCache(employee); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to store employee in Redis"})
 			return
@@ -49,11 +50,10 @@ func UploadEmployeeData(c *gin.Context) {
 	// Respond with the parsed data
 	c.JSON(http.StatusOK, gin.H{"employees": employees})
 
-	// Optionally, you can delete the file after processing
+	// Cleanup the file after processing
 	os.Remove(file.Filename)
 }
 
-// GetEmployee handles fetching employee data
 func GetEmployee(c *gin.Context) {
 	email := c.Param("email")
 
@@ -85,11 +85,9 @@ func GetEmployee(c *gin.Context) {
 	}
 
 	// Respond with the employee data
-	// TODO: Store data in JSON format
 	c.JSON(http.StatusOK, gin.H{"email": employee.Email, "employee": employee, "source": "database"})
 }
 
-// UpdateEmployee handles updating an employee record
 func UpdateEmployee(c *gin.Context) {
 	email := c.Param("email")
 	var updatedEmployee datamodel.Employee
@@ -116,22 +114,21 @@ func UpdateEmployee(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Employee updated successfully", "employee": updatedEmployee})
 }
 
-// UpdateEmployee handles updating an employee record
 func DeleteEmployee(c *gin.Context) {
 	email := c.Param("email")
 
-	// Update the employee in MySQL
+	// Delete the employee from MySQL
 	if err := persistence.DB.Model(&datamodel.Employee{}).Where("email = ?", email).Delete("email = ?").Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to delete employee in MySQL"})
 		return
 	}
 
-	// Update the employee in Redis
+	// Delete the employee from Redis
 	if err := persistence.DeleteEmployeeInCache(email); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to delete employee in Redis"})
 		return
 	}
 
-	// Respond with the updated employee data
+	// Respond with the delete employee email
 	c.JSON(http.StatusOK, gin.H{"message": "Employee delelted successfully", "employee-email": email})
 }

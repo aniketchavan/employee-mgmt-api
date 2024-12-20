@@ -1,4 +1,3 @@
-// database/redis.go
 package persistence
 
 import (
@@ -14,6 +13,7 @@ import (
 var RedisClient *redis.Client
 var ctx = context.Background()
 
+// Initialize the Redis Client
 func InitRedis(addr string) {
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr: addr,
@@ -26,10 +26,11 @@ func StoreEmployeeInCache(employee datamodel.Employee) error {
 	if err != nil {
 		return err
 	}
-	return RedisClient.Set(ctx, employee.Email, string(employeeStr), 5*time.Minute).Err() // Use Email as the key
+	// TODO: Make expiry time configurable - take value from config
+	return RedisClient.Set(ctx, employee.Email, string(employeeStr), 5*time.Minute).Err()
 }
 
 func DeleteEmployeeInCache(email string) error {
 	// Delete employee data in Redis
-	return RedisClient.Del(ctx, email).Err() // Use Email as the key
+	return RedisClient.Del(ctx, email).Err()
 }

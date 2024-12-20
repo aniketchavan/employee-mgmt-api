@@ -1,4 +1,3 @@
-// models/employee.go
 package datamodel
 
 type Employee struct {

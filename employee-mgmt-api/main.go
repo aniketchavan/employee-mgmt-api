@@ -14,10 +14,10 @@ import (
 
 func main() {
 
-	// Read the YAML file
-	// Unmarshal the YAML data into the Config struct
+	// Read the Config YAML file
 	config.InitializeConfigurations()
 
+	// Check if port number is valid
 	mySqlPort := 3306
 	if portValue, isPresent := config.ConfigSet.Properties["MySqlPort"]; isPresent {
 		portValue, err := strconv.Atoi(portValue)
